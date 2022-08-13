@@ -23,7 +23,7 @@ CR   equ   $0D
 LF   equ   $0A
 crlf dc.b  CR,LF,' ',0
 nl   dc.b  nl-crlf
-str  dc.b  ' ',0
+str  ds.b  64
 len  dc    len-str
 pr1  dc.b  'Enter a string to search in: ',0
 ps1  dc    ps1-pr1
@@ -46,7 +46,7 @@ main:  ; main entry point of the program
 ; that's why str (temp string) was made and used
 ; although it's not working right at the momoent
     lea     str,a1          ; use a termporary string to not write over pr1
-    move.w  len,d1          ; use temp string length
+    move.w  len,d1          ; use temp string length    
     moveQ.l #2,d0           ; move literal 2 to d0
     trap    #15             ; read string from console
     
@@ -88,7 +88,7 @@ exit:  ; exit main loop
     moveQ.l #0,d0
     trap    #15
     
-    move.w  d5,d1
+    move.w  d5,d1           ; print number of occurrences
     moveQ.l #3,d0
     trap    #15    
 
@@ -118,6 +118,8 @@ again:
     jmp     main       
     
     END     main
+
+
 
 *~Font name~Courier New~
 *~Font size~10~

@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 8/13/2022 5:29:44 PM
+Created On: 8/13/2022 9:47:59 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  String Searcher
@@ -27,21 +27,21 @@ Created On: 8/13/2022 5:29:44 PM
 00000600  =0000000A                 23  LF   equ   $0A
 00000600= 0D 0A 20 00               24  crlf dc.b  CR,LF,' ',0
 00000604= 04                        25  nl   dc.b  nl-crlf
-00000605= 20 00                     26  str  dc.b  ' ',0
-00000608= 0003                      27  len  dc    len-str
-0000060A= 45 6E 74 65 72 20 ...     28  pr1  dc.b  'Enter a string to search in: ',0
-00000628= 001E                      29  ps1  dc    ps1-pr1
-0000062A= 45 6E 74 65 72 20 ...     30  pr2  dc.b  'Enter a character to search for: ',0
-0000064C= 0022                      31  ps2  dc    ps2-pr2
-0000064E= 0D 0A 66 6F 75 6E ...     32  pr3  dc.b  CR,LF,'found: ',0
-00000658= 000A                      33  ps3  dc    ps3-pr3
-0000065A= 0D 0A 64 6F 20 79 ...     34  pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
-00000678= 001E                      35  pse  dc    pse-pre
-0000067A                            36  
+00000605                            26  str  ds.b  64
+00000646= 0041                      27  len  dc    len-str
+00000648= 45 6E 74 65 72 20 ...     28  pr1  dc.b  'Enter a string to search in: ',0
+00000666= 001E                      29  ps1  dc    ps1-pr1
+00000668= 45 6E 74 65 72 20 ...     30  pr2  dc.b  'Enter a character to search for: ',0
+0000068A= 0022                      31  ps2  dc    ps2-pr2
+0000068C= 0D 0A 66 6F 75 6E ...     32  pr3  dc.b  CR,LF,'found: ',0
+00000696= 000A                      33  ps3  dc    ps3-pr3
+00000698= 0D 0A 64 6F 20 79 ...     34  pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
+000006B6= 001E                      35  pse  dc    pse-pre
+000006B8                            36  
 00001000                            37      ORG    $1000
 00001000                            38  main:  ; main entry point of the program
-00001000  43F8 060A                 39      lea     pr1,a1          ; load 1st prompt into A1
-00001004  3238 0628                 40      move.w  ps1,d1          ; D1 = prompt size
+00001000  43F8 0648                 39      lea     pr1,a1          ; load 1st prompt into A1
+00001004  3238 0666                 40      move.w  ps1,d1          ; D1 = prompt size
 00001008  7000                      41      moveQ.l #0,d0           ; move literal zero to d0
 0000100A  4E4F                      42      trap    #15             ; display prompt
 0000100C                            43      
@@ -50,7 +50,7 @@ Created On: 8/13/2022 5:29:44 PM
 0000100C                            46  ; that's why str (temp string) was made and used
 0000100C                            47  ; although it's not working right at the momoent
 0000100C  43F8 0605                 48      lea     str,a1          ; use a termporary string to not write over pr1
-00001010  3238 0608                 49      move.w  len,d1          ; use temp string length
+00001010  3238 0646                 49      move.w  len,d1          ; use temp string length    
 00001014  7002                      50      moveQ.l #2,d0           ; move literal 2 to d0
 00001016  4E4F                      51      trap    #15             ; read string from console
 00001018                            52      
@@ -58,8 +58,8 @@ Created On: 8/13/2022 5:29:44 PM
 0000101A  1801                      54      move.b  d1,d4
 0000101C                            55      
 0000101C                            56  ; load 2nd prompt
-0000101C  43F8 062A                 57      lea     pr2,A1          
-00001020  3238 064C                 58      move.w  ps2,D1
+0000101C  43F8 0668                 57      lea     pr2,A1          
+00001020  3238 068A                 58      move.w  ps2,D1
 00001024  7000                      59      moveQ.l #0,d0  
 00001026  4E4F                      60      trap    #15
 00001028                            61      
@@ -87,18 +87,18 @@ Created On: 8/13/2022 5:29:44 PM
 00001044                            83  
 00001044                            84  exit:  ; exit main loop
 00001044                            85  ; print result prompt
-00001044  43F8 064E                 86      lea     pr3,A1
-00001048  3238 0658                 87      move.w  ps3,D1
+00001044  43F8 068C                 86      lea     pr3,A1
+00001048  3238 0696                 87      move.w  ps3,D1
 0000104C  7000                      88      moveQ.l #0,d0
 0000104E  4E4F                      89      trap    #15
 00001050                            90      
-00001050  3205                      91      move.w  d5,d1
+00001050  3205                      91      move.w  d5,d1           ; print number of occurrences
 00001052  7003                      92      moveQ.l #3,d0
 00001054  4E4F                      93      trap    #15    
 00001056                            94  
 00001056                            95  ; print exit prompt
-00001056  43F8 065A                 96      lea     pre,A1
-0000105A  3238 0678                 97      move.w  pse,D1
+00001056  43F8 0698                 96      lea     pre,A1
+0000105A  3238 06B6                 97      move.w  pse,D1
 0000105E  7000                      98      moveQ.l #0,d0
 00001060  4E4F                      99      trap    #15
 00001062                           100  
@@ -136,18 +136,18 @@ CRLF                600
 DATA                600
 EQUAL               103E
 EXIT                1044
-LEN                 608
+LEN                 646
 LF                  A
 LOOP                102E
 MAIN                1000
 NL                  604
-PR1                 60A
-PR2                 62A
-PR3                 64E
-PRE                 65A
-PS1                 628
-PS2                 64C
-PS3                 658
-PSE                 678
+PR1                 648
+PR2                 668
+PR3                 68C
+PRE                 698
+PS1                 666
+PS2                 68A
+PS3                 696
+PSE                 6B6
 RET                 1034
 STR                 605
