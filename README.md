@@ -1,4 +1,4 @@
-# m68k-asem-projects
+# m68k-project
 Simple m68k assembly project, searches for a character with in a given string.
 
 Write a 68000 assembly code that searches for a certain character in a 
