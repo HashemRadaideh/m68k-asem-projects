@@ -36,13 +36,12 @@ crlf dc.b  CR,LF,' ',0      ; HACK: easy way to print newline
 nl   dc.b  nl-crlf          ; find string size automatically
 
     ORG    $1000
-main:  ; main entry point of the program
+main:
     lea     pr1,a1      ; load 1st prompt into A1
     move.w  ps1,d1      ; D1 = prompt size
     clr.l   d0          ; empty d0 for use with trap #15
     trap    #15         ; display prompt
     
-; read string from user
     lea     str,a1      ; store user entered string in str
     move.w  len,d1      ; store str size   
     moveQ.l #2,d0       ; move literal 2 to d0
@@ -59,7 +58,7 @@ main:  ; main entry point of the program
     moveQ.l #5,d0       ; move literal 5 to d0
     trap    #15         ; read a single character from console
     
-    clr.l   d5       ; D5 used for as a sum counter (sum = 0)
+    clr.l   d5          ; D5 used for as a sum counter (sum = 0)
 loop:   
 	cmp.b   (A2)+,d1    ; if equal add 1 to sum
     bne     neq         ; else exit if statment
@@ -93,7 +92,7 @@ neq subQ.b  #1,d4       ; subtract one from d4 (string size)
     
     moveQ.l #'y',d7     ; move 'y' to d7
     cmp.b   d6,d7       ; compare 'y' to captured character
-    bne     main       ; if answer == 'y' exit main loop else loop again
+    bne     main        ; if answer == 'y' exit main loop else loop again
 
     stop    #2700       ; end of program (return 0)
     SIMHALT  
