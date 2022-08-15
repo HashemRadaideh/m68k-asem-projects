@@ -1,7 +1,9 @@
 *-----------------------------------------------------------
+* Demo vidoe :  
 * Title      :  String Searcher
 * Written by :  Hashem Al-Radaideh
 * Date       :  Saturday, 12th August 2022
+* Site       :  https://github.com/HashemRadaideh/m68k-project
 * Description:  
 * Write a 68000 assembly code that searches for a certain character in a 
 * null-terminated text stored in the memory and counts its occurrences in
@@ -17,14 +19,7 @@
 * if he/she wants or exit the search.
 *-----------------------------------------------------------
 
-    ORG     $600
-data:
-CR   equ   $0D
-LF   equ   $0A
-crlf dc.b  CR,LF,' ',0
-nl   dc.b  nl-crlf
-str  ds.b  100
-len  dc    len-str
+    ORG    $420
 pr1  dc.b  'Enter a string to search in: ',0
 ps1  dc    ps1-pr1
 pr2  dc.b  'Enter a character to search for: ',0
@@ -33,87 +28,75 @@ pr3  dc.b  CR,LF,'found: ',0
 ps3  dc    ps3-pr3
 pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
 pse  dc    pse-pre
+str  ds.b  100              ; same as in c/c++ (char str[100];)
+len  dc    len-str
+CR   equ   $0D
+LF   equ   $0A
+crlf dc.b  CR,LF,' ',0      ; HACK: easy way to print newline
+nl   dc.b  nl-crlf          ; find string size automatically
 
     ORG    $1000
 main:  ; main entry point of the program
-    lea     pr1,a1          ; load 1st prompt into A1
-    move.w  ps1,d1          ; D1 = prompt size
-    moveQ.l #0,d0           ; move literal zero to d0
-    trap    #15             ; display prompt
+    lea     pr1,a1      ; load 1st prompt into A1
+    move.w  ps1,d1      ; D1 = prompt size
+    clr.l   d0          ; empty d0 for use with trap #15
+    trap    #15         ; display prompt
     
 ; read string from user
-    lea     str,a1          ; use a termporary string to not write over pr1
-    move.w  len,d1          ; use temp string length    
-    moveQ.l #2,d0           ; move literal 2 to d0
-    trap    #15             ; read string from console
+    lea     str,a1      ; store user entered string in str
+    move.w  len,d1      ; store str size   
+    moveQ.l #2,d0       ; move literal 2 to d0
+    trap    #15         ; read a string from console
     
-    lea     (a1),a2
-    move.b  d1,d4
+    lea     (a1),a2     ; move string to a2 for comparison
+    move.b  d1,d4       ; move string size to d4 for the number of loops
     
-; load 2nd prompt
-    lea     pr2,A1          
+    lea     pr2,A1      ; load 2nd prompt
     move.w  ps2,D1
-    moveQ.l #0,d0  
+    clr.l   d0
     trap    #15
     
-; read a single character from console
-    moveQ.l #5,d0           ; move literal 5 to d0
-    trap    #15             ; read a character
+    moveQ.l #5,d0       ; move literal 5 to d0
+    trap    #15         ; read a single character from console
     
-; for loop with if statement
-    moveQ.l #0,d5           ; D2 used for sum (sum = 0)
-loop:
-; if found go to equal
-	cmp.b   (A2)+,d1        ; beginning of if
-    beq     equal           
-
-; else continue
-ret subQ.b  #1,d4           ; subtract one from d4 (string size)       
-    bne     loop            ; loop back
-    jmp     exit
-    
-; character was found
-equal:
-    addQ.l  #1,d5
-    jmp     ret
-; end of if
-
-exit:  ; exit main loop
-; print result prompt
-    lea     pr3,A1
-    move.w  ps3,D1
-    moveQ.l #0,d0
+    clr.l   d5       ; D5 used for as a sum counter (sum = 0)
+loop:   
+	cmp.b   (A2)+,d1    ; if equal add 1 to sum
+    bne     neq         ; else exit if statment
+    addQ.l  #1,d5       ; character was found
+neq subQ.b  #1,d4       ; subtract one from d4 (string size)       
+    bne     loop        ; loop back if not equal
+ 
+    lea     pr3,a1      ; print result prompt
+    move.w  ps3,d1
+    clr.l   d0
     trap    #15
     
-    move.w  d5,d1           ; print number of occurrences
+    move.w  d5,d1       ; print number of occurrences
     moveQ.l #3,d0
     trap    #15    
 
-; print exit prompt
-    lea     pre,A1
-    move.w  pse,D1
-    moveQ.l #0,d0
+    lea     pre,a1  `   ; print exit prompt
+    move.w  pse,d1
+    clr.l   d0
     trap    #15
 
-; capture a single character
-    moveQ.l #5,d0
+    moveQ.l #5,d0       ; capture a single character
     trap    #15
     
-    moveQ.l #'y',d7         ; move 'y' to d7
-    cmp.b   d1,d7           ; compare 'y' to captured character
-    bne     again           ; if answer = 'y' exit main loop else start again
+    move    d1,d6       ; move user entered character to d6 for later use
+    
+    lea     crlf,a1     ; print new line
+    move.w  nl,d1
+    clr.l   d0
+    trap    #15
+    
+    moveQ.l #'y',d7     ; move 'y' to d7
+    cmp.b   d6,d7       ; compare 'y' to captured character
+    bne     main       ; if answer == 'y' exit main loop else loop again
 
-; end of program (return 0)
-    stop    #2700
-    SIMHALT
-        
-again:
-    lea     crlf,A1
-    move.w  nl,D1
-    moveQ.l #0,d0
-    trap    #15
-    jmp     main       
-    
+    stop    #2700       ; end of program (return 0)
+    SIMHALT  
     END     main
 *~Font name~Courier New~
 *~Font size~10~

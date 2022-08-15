@@ -1,127 +1,107 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.16.01
-Created On: 8/14/2022 2:14:09 PM
+Created On: 8/15/2022 7:25:52 PM
 
 00000000                             1  *-----------------------------------------------------------
-00000000                             2  * Title      :  String Searcher
-00000000                             3  * Written by :  Hashem Al-Radaideh
-00000000                             4  * Date       :  Saturday, 12th August 2022
-00000000                             5  * Description:  
-00000000                             6  * Write a 68000 assembly code that searches for a certain character in a 
-00000000                             7  * null-terminated text stored in the memory and counts its occurrences in
-00000000                             8  * that text.
-00000000                             9  *
-00000000                            10  * The code should use TRAP instruction to prompt the user to enter the
-00000000                            11  * character he/she wants to search for.
-00000000                            12  *
-00000000                            13  * Then it calls a subroutine to find how many times the character occurs
-00000000                            14  * in the text, and then it prints a message with the result on the screen.
-00000000                            15  *
-00000000                            16  * The code should also give the user the choice to enter another character
-00000000                            17  * if he/she wants or exit the search.
-00000000                            18  *-----------------------------------------------------------
-00000000                            19  
-00000600                            20      ORG     $600
-00000600                            21  data:
-00000600  =0000000D                 22  CR   equ   $0D
-00000600  =0000000A                 23  LF   equ   $0A
-00000600= 0D 0A 20 00               24  crlf dc.b  CR,LF,' ',0
-00000604= 04                        25  nl   dc.b  nl-crlf
-00000605                            26  str  ds.b  64
-00000646= 0041                      27  len  dc    len-str
-00000648= 45 6E 74 65 72 20 ...     28  pr1  dc.b  'Enter a string to search in: ',0
-00000666= 001E                      29  ps1  dc    ps1-pr1
-00000668= 45 6E 74 65 72 20 ...     30  pr2  dc.b  'Enter a character to search for: ',0
-0000068A= 0022                      31  ps2  dc    ps2-pr2
-0000068C= 0D 0A 66 6F 75 6E ...     32  pr3  dc.b  CR,LF,'found: ',0
-00000696= 000A                      33  ps3  dc    ps3-pr3
-00000698= 0D 0A 64 6F 20 79 ...     34  pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
-000006B6= 001E                      35  pse  dc    pse-pre
-000006B8                            36  
-00001000                            37      ORG    $1000
-00001000                            38  main:  ; main entry point of the program
-00001000  43F8 0648                 39      lea     pr1,a1          ; load 1st prompt into A1
-00001004  3238 0666                 40      move.w  ps1,d1          ; D1 = prompt size
-00001008  7000                      41      moveQ.l #0,d0           ; move literal zero to d0
-0000100A  4E4F                      42      trap    #15             ; display prompt
-0000100C                            43      
-0000100C                            44  ; read string from user
-0000100C                            45  ; reading a string from user writes over a1 and d1
-0000100C                            46  ; that's why str (temp string) was made and used
-0000100C                            47  ; although it's not working right at the momoent
-0000100C  43F8 0605                 48      lea     str,a1          ; use a termporary string to not write over pr1
-00001010  3238 0646                 49      move.w  len,d1          ; use temp string length    
-00001014  7002                      50      moveQ.l #2,d0           ; move literal 2 to d0
-00001016  4E4F                      51      trap    #15             ; read string from console
-00001018                            52      
-00001018  45D1                      53      lea     (a1),a2
-0000101A  1801                      54      move.b  d1,d4
-0000101C                            55      
-0000101C                            56  ; load 2nd prompt
-0000101C  43F8 0668                 57      lea     pr2,A1          
-00001020  3238 068A                 58      move.w  ps2,D1
-00001024  7000                      59      moveQ.l #0,d0  
-00001026  4E4F                      60      trap    #15
-00001028                            61      
-00001028                            62  ; read a single character from console
-00001028  7005                      63      moveQ.l #5,d0           ; move literal 5 to d0
-0000102A  4E4F                      64      trap    #15             ; read a character
-0000102C                            65      
-0000102C                            66  ; for loop with if statement
-0000102C  7A00                      67      moveQ.l #0,d5           ; D2 used for sum (sum = 0)
-0000102E                            68  loop:
-0000102E                            69  ; if found go to equal
-0000102E  B21A                      70      cmp.b   (A2)+,d1        ; beginning of if
-00001030  6700 000C                 71      beq     equal           
-00001034                            72  
-00001034                            73  ; else continue
-00001034  5304                      74  ret subQ.b  #1,d4           ; subtract one from d4 (string size)       
-00001036  66F6                      75      bne     loop            ; loop back
-00001038  4EF9 00001044             76      jmp     exit
-0000103E                            77      
-0000103E                            78  ; character was found
-0000103E                            79  equal:
-0000103E  5285                      80      addQ.l  #1,d5
-00001040  4EF8 1034                 81      jmp     ret
-00001044                            82  ; end of if
-00001044                            83  
-00001044                            84  exit:  ; exit main loop
-00001044                            85  ; print result prompt
-00001044  43F8 068C                 86      lea     pr3,A1
-00001048  3238 0696                 87      move.w  ps3,D1
-0000104C  7000                      88      moveQ.l #0,d0
-0000104E  4E4F                      89      trap    #15
-00001050                            90      
-00001050  3205                      91      move.w  d5,d1           ; print number of occurrences
-00001052  7003                      92      moveQ.l #3,d0
-00001054  4E4F                      93      trap    #15    
-00001056                            94  
-00001056                            95  ; print exit prompt
-00001056  43F8 0698                 96      lea     pre,A1
-0000105A  3238 06B6                 97      move.w  pse,D1
-0000105E  7000                      98      moveQ.l #0,d0
-00001060  4E4F                      99      trap    #15
-00001062                           100  
-00001062                           101  ; capture a single character
-00001062  7005                     102      moveQ.l #5,d0
-00001064  4E4F                     103      trap    #15
-00001066                           104      
-00001066  7E79                     105      moveQ.l #'y',d7         ; move 'y' to d7
-00001068  BE01                     106      cmp.b   d1,d7           ; compare 'y' to captured character
-0000106A  6600 000A                107      bne     again           ; if answer = 'y' exit main loop else start again
-0000106E                           108  
-0000106E                           109  ; end of program (return 0)
-0000106E  4E72 0A8C                110      stop    #2700
-00001072  FFFF FFFF                111      SIMHALT
-00001076                           112          
-00001076                           113  again:
-00001076  43F8 0600                114      lea     crlf,A1
-0000107A  3238 0604                115      move.w  nl,D1
-0000107E  7000                     116      moveQ.l #0,d0
-00001080  4E4F                     117      trap    #15
-00001082  4EF8 1000                118      jmp     main       
-00001086                           119      
-00001086                           120      END     main
+00000000                             2  * Demo vidoe :  
+00000000                             3  * Title      :  String Searcher
+00000000                             4  * Written by :  Hashem Al-Radaideh
+00000000                             5  * Date       :  Saturday, 12th August 2022
+00000000                             6  * Site       :  https://github.com/HashemRadaideh/m68k-project
+00000000                             7  * Description:  
+00000000                             8  * Write a 68000 assembly code that searches for a certain character in a 
+00000000                             9  * null-terminated text stored in the memory and counts its occurrences in
+00000000                            10  * that text.
+00000000                            11  *
+00000000                            12  * The code should use TRAP instruction to prompt the user to enter the
+00000000                            13  * character he/she wants to search for.
+00000000                            14  *
+00000000                            15  * Then it calls a subroutine to find how many times the character occurs
+00000000                            16  * in the text, and then it prints a message with the result on the screen.
+00000000                            17  *
+00000000                            18  * The code should also give the user the choice to enter another character
+00000000                            19  * if he/she wants or exit the search.
+00000000                            20  *-----------------------------------------------------------
+00000000                            21  
+00000420                            22      ORG     $420
+00000420= 45 6E 74 65 72 20 ...     23  pr1  dc.b  'Enter a string to search in: ',0
+0000043E= 001E                      24  ps1  dc    ps1-pr1
+00000440= 45 6E 74 65 72 20 ...     25  pr2  dc.b  'Enter a character to search for: ',0
+00000462= 0022                      26  ps2  dc    ps2-pr2
+00000464= 0D 0A 66 6F 75 6E ...     27  pr3  dc.b  CR,LF,'found: ',0
+0000046E= 000A                      28  ps3  dc    ps3-pr3
+00000470= 0D 0A 64 6F 20 79 ...     29  pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
+0000048E= 001E                      30  pse  dc    pse-pre
+00000490                            31  str  ds.b  100              ; same as in c/c++ (char str[100];)
+000004F4= 0064                      32  len  dc    len-str
+000004F6  =0000000D                 33  CR   equ   $0D
+000004F6  =0000000A                 34  LF   equ   $0A
+000004F6= 0D 0A 20 00               35  crlf dc.b  CR,LF,' ',0      ; HACK: easy way to print newline
+000004FA= 04                        36  nl   dc.b  nl-crlf          ; find string size automatically
+000004FB                            37  
+00001000                            38      ORG    $1000
+00001000                            39  main:  ; main entry point of the program
+00001000  43F8 0420                 40      lea     pr1,a1      ; load 1st prompt into A1
+00001004  3238 043E                 41      move.w  ps1,d1      ; D1 = prompt size
+00001008  4280                      42      clr.l   d0          ; empty d0 for use with trap #15
+0000100A  4E4F                      43      trap    #15         ; display prompt
+0000100C                            44      
+0000100C                            45  ; read string from user
+0000100C  43F8 0490                 46      lea     str,a1      ; store user entered string in str
+00001010  3238 04F4                 47      move.w  len,d1      ; store str size   
+00001014  7002                      48      moveQ.l #2,d0       ; move literal 2 to d0
+00001016  4E4F                      49      trap    #15         ; read a string from console
+00001018                            50      
+00001018  45D1                      51      lea     (a1),a2     ; move string to a2 for comparison
+0000101A  1801                      52      move.b  d1,d4       ; move string size to d4 for the number of loops
+0000101C                            53      
+0000101C  43F8 0440                 54      lea     pr2,A1      ; load 2nd prompt
+00001020  3238 0462                 55      move.w  ps2,D1
+00001024  4280                      56      clr.l   d0
+00001026  4E4F                      57      trap    #15
+00001028                            58      
+00001028  7005                      59      moveQ.l #5,d0       ; move literal 5 to d0
+0000102A  4E4F                      60      trap    #15         ; read a single character from console
+0000102C                            61      
+0000102C  4285                      62      clr.l   d5       ; D5 used for as a sum counter (sum = 0)
+0000102E                            63  loop:   
+0000102E  B21A                      64      cmp.b   (A2)+,d1    ; if equal add 1 to sum
+00001030  6600 0004                 65      bne     neq         ; else exit if statment
+00001034  5285                      66      addQ.l  #1,d5       ; character was found
+00001036  5304                      67  neq subQ.b  #1,d4       ; subtract one from d4 (string size)       
+00001038  66F4                      68      bne     loop        ; loop back if not equal
+0000103A                            69   
+0000103A  43F8 0464                 70      lea     pr3,a1      ; print result prompt
+0000103E  3238 046E                 71      move.w  ps3,d1
+00001042  4280                      72      clr.l   d0
+00001044  4E4F                      73      trap    #15
+00001046                            74      
+00001046  3205                      75      move.w  d5,d1       ; print number of occurrences
+00001048  7003                      76      moveQ.l #3,d0
+0000104A  4E4F                      77      trap    #15    
+0000104C                            78  
+0000104C  43F8 0470                 79      lea     pre,a1  `   ; print exit prompt
+00001050  3238 048E                 80      move.w  pse,d1
+00001054  4280                      81      clr.l   d0
+00001056  4E4F                      82      trap    #15
+00001058                            83  
+00001058  7005                      84      moveQ.l #5,d0       ; capture a single character
+0000105A  4E4F                      85      trap    #15
+0000105C                            86      
+0000105C  3C01                      87      move    d1,d6       ; move user entered character to d6 for later use
+0000105E                            88      
+0000105E  43F8 04F6                 89      lea     crlf,a1     ; print new line
+00001062  3238 04FA                 90      move.w  nl,d1
+00001066  4280                      91      clr.l   d0
+00001068  4E4F                      92      trap    #15
+0000106A                            93      
+0000106A  7E79                      94      moveQ.l #'y',d7     ; move 'y' to d7
+0000106C  BE06                      95      cmp.b   d6,d7       ; compare 'y' to captured character
+0000106E  6690                      96      bne     main       ; if answer == 'y' exit main loop else loop again
+00001070                            97  
+00001070  4E72 0A8C                 98      stop    #2700       ; end of program (return 0)
+00001074  FFFF FFFF                 99      SIMHALT  
+00001078                           100      END     main
 
 No errors detected
 No warnings generated
@@ -130,24 +110,20 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-AGAIN               1076
 CR                  D
-CRLF                600
-DATA                600
-EQUAL               103E
-EXIT                1044
-LEN                 646
+CRLF                4F6
+LEN                 4F4
 LF                  A
 LOOP                102E
 MAIN                1000
-NL                  604
-PR1                 648
-PR2                 668
-PR3                 68C
-PRE                 698
-PS1                 666
-PS2                 68A
-PS3                 696
-PSE                 6B6
-RET                 1034
-STR                 605
+NEQ                 1036
+NL                  4FA
+PR1                 420
+PR2                 440
+PR3                 464
+PRE                 470
+PS1                 43E
+PS2                 462
+PS3                 46E
+PSE                 48E
+STR                 490
