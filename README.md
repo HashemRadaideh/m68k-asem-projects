@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-https://github.com/HashemRadaideh/m68k-project
-
-# m68k-asem-projects
-=======
 # m68k-project
->>>>>>> eecaed25e45f56a4b105b5c1f080fd9496f5091d
+
 Simple m68k assembly project, searches for a character with in a given string.
 
 Write a 68000 assembly code that searches for a certain character in a 
