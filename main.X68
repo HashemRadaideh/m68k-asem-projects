@@ -1,5 +1,5 @@
 *-----------------------------------------------------------
-* Demo vidoe :  
+* Demo vidoe :  https://youtu.be/1-Eppaii8_s
 * Title      :  String Searcher
 * Written by :  Hashem Al-Radaideh
 * Date       :  Saturday, 12th August 2022
@@ -20,20 +20,20 @@
 *-----------------------------------------------------------
 
     ORG    $420
+str  ds.b  100          ; same as in c/c++ (char str[100];)
+len  dc    len-str
 pr1  dc.b  'Enter a string to search in: ',0
 ps1  dc    ps1-pr1
 pr2  dc.b  'Enter a character to search for: ',0
 ps2  dc    ps2-pr2
-pr3  dc.b  CR,LF,'found: ',0
+pr3  dc.b  CR,LF,'Found: ',0
 ps3  dc    ps3-pr3
 pre  dc.b  CR,LF,'do you wish to exit: [y|N]',0
 pse  dc    pse-pre
-str  ds.b  100              ; same as in c/c++ (char str[100];)
-len  dc    len-str
+crlf dc.b  CR,LF,' ',0  ; HACK: easy way to print newline
+nl   dc.b  nl-crlf      ; find string size automatically
 CR   equ   $0D
 LF   equ   $0A
-crlf dc.b  CR,LF,' ',0      ; HACK: easy way to print newline
-nl   dc.b  nl-crlf          ; find string size automatically
 
     ORG    $1000
 main:
