@@ -1,0 +1,221 @@
+00001058 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 8/30/2022 5:35:02 PM
+
+00000000                             1  *-----------------------------------------------------------
+00000000                             2  * Demo vidoe :  https://youtu.be/1-Eppaii8_s
+00000000                             3  * Title      :  Login system
+00000000                             4  * Written by :  Hashem Al-Radaideh
+00000000                             5  * Date       :  Saturday, 25th August 2022
+00000000                             6  * Site       :  https://github.com/HashemRadaideh/m68k-project
+00000000                             7  * Description:  
+00000000                             8  * Write a 68000 assembly code that does the following:
+00000000                             9  * 
+00000000                            10  * If a hardware RESET happens, it:
+00000000                            11  * 
+00000000                            12  * a. Prints some start-up/welcome message
+00000000                            13  *    indicating a hardware reset has happened.
+00000000                            14  * b. Then, prompts the user to enter a login and a password.
+00000000                            15  *    The login name is "admin" and the password can be any string of your choice.
+00000000                            16  * c. After verifying correct login and password, it prints a message to welcome
+00000000                            17  *    the user and then flashes the LEDs ON/OFF with some delay in between 
+00000000                            18  *    a few times then it goes back to the main program.
+00000000                            19  * d. If the login information is wrong then it prints invalid login or password message and lets the user try again.
+00000000                            20  * And if a level-7 interrupt comes, it does the following:
+00000000                            21  * 
+00000000                            22  * a. Prints some message indicating that a level-7 interrupt has happened.
+00000000                            23  * b. Then, prints: 0 ... 1 ... 2 ... 3 ... 4 ... 5 ... 6 ... 7 on the screen with some delay in between.
+00000000                            24  * c. Then, displays a scrolling (moving) message on the seven-segment display. The message can be long with multiple words like this one for example:
+00000000                            25  * HELLO HASSAn PIn 5683
+00000000                            26  * 
+00000000                            27  * Then it goes back to the main program.
+00000000                            28  * 
+00000000                            29  * The main program can be a very simple code simply incrementing some register with some delay in between and infinitely looping.
+00000000                            30  *-----------------------------------------------------------
+00000000                            31  
+00000000                            32  
+00001000                            33              ORG     $1000
+00001000  2E3C 00061A80             34  dly:        move.l  #400000,d7              ; create a delay approximately 2.5s
+00001006  5387                      35  lp:         subQ.l  #1,d7                   ; if the cpu ran on 16mhz frequency
+00001008  66FC                      36              bne     lp
+0000100A  4E75                      37              rts
+0000100C                            38  
+0000100C                            39      
+0000100C  5282                      40  cntr:       add.l   #1,d2
+0000100E  2202                      41              move.l  d2,d1
+00001010  303C 0003                 42              move    #3,d0
+00001014  4E4F                      43              trap    #15
+00001016                            44  
+00001016  43F9 00001100             45              lea     dots,a1
+0000101C  303C 000E                 46              move    #14,d0
+00001020  4E4F                      47              trap    #15
+00001022  4E75                      48              rts
+00001024                            49  
+00001024                            50  
+00001024  3E3C 0000                 51  wUsr:       move    #0,d7    
+00001028  43F9 00001108             52              lea     wName,a1                ; print "Enter username: "
+0000102E  3239 00001124             53              move.w  wns,d1     
+00001034  4280                      54              clr.l   d0          
+00001036  4E4F                      55              trap    #15 
+00001038  4EF9 00001058             56              jmp     main
+0000103E                            57  
+0000103E                            58  
+0000103E  3C3C 0000                 59  wPswd:      move    #0,d6    
+00001042  43F9 00001126             60              lea     wPass,a1                ; print "Enter username: "
+00001048  3239 00001142             61              move.w  wps,d1     
+0000104E  4280                      62              clr.l   d0          
+00001050  4E4F                      63              trap    #15 
+00001052  4EF9 00001058             64              jmp     main
+00001058                            65  
+00001058                            66  
+00001058  43F9 00001144             67  main:       lea     pr1,a1                  ; print "Enter username: "
+0000105E  3239 00001156             68              move.w  ps1,d1     
+00001064  4280                      69              clr.l   d0          
+00001066  4E4F                      70              trap    #15        
+00001068                            71  
+00001068  43F9 00001173             72              lea     name,a1                 ; input username
+0000106E  3239 000011D8             73              move.w  ns,d1       
+00001074  7002                      74              moveQ.l #2,d0       
+00001076  4E4F                      75              trap    #15         
+00001078                            76  
+00001078  45D1                      77              lea     (a1),a2                 ; save username in a2 for comparison
+0000107A  1401                      78              move.b  d1,d2            
+0000107C                            79  
+0000107C  6182                      80              bsr     dly
+0000107E                            81  
+0000107E  43F9 00001158             82              lea     pr2,a1                  ; print "Enter password: "
+00001084  3239 0000116A             83              move.w  ps2,d1     
+0000108A  4280                      84              clr.l   d0
+0000108C  4E4F                      85              trap    #15
+0000108E                            86  
+0000108E  43F9 000011E0             87              lea     pswd,a1                 ; input password
+00001094  3239 00001244             88              move.w  pws,d1       
+0000109A  7002                      89              moveQ.l #2,d0       
+0000109C  4E4F                      90              trap    #15      
+0000109E                            91  
+0000109E  47D1                      92              lea     (a1),a3                 ; save password in a3 for comparison
+000010A0  1601                      93              move.b  d1,d3
+000010A2                            94  
+000010A2  6100 FF5C                 95              bsr     dly
+000010A6                            96  
+000010A6                            97  ; to check if two strings are equal
+000010A6                            98  ; compare the sizes of the strings first
+000010A6                            99  ; and start with the assumption of true
+000010A6                           100  ; setting d7 to 1 if true and 0 otherwise false
+000010A6                           101  ; the second it set to 0 exit the loop
+000010A6                           102  ; no need to continue
+000010A6                           103  
+000010A6  1839 00001172            104              move.b  uns,d4
+000010AC  B802                     105              cmp.b   d2,d4
+000010AE  6600 FF74                106              bne     wUsr
+000010B2                           107  
+000010B2  49F9 0000116C            108              lea     user,a4
+000010B8  3E3C 0001                109              move    #1,d7                   ; set d7 to true
+000010BC  B90A                     110  lp1:        cmp.b   (a2)+,(a4)+
+000010BE  6600 FF64                111              bne     wUsr
+000010C2  5302                     112              subQ.b  #1,d2
+000010C4  66F6                     113              bne     lp1
+000010C6                           114  
+000010C6  1839 000011DF            115              move.b  ps,d4
+000010CC  B843                     116              cmp     d3,d4
+000010CE  6600 FF6E                117              bne     wPswd
+000010D2                           118  
+000010D2  49F9 000011DA            119              lea     pass,a4
+000010D8  3C3C 0001                120              move    #1,d6                   ; set d6 to true
+000010DC  B90B                     121  lp2:        cmp.b   (a3)+,(a4)+
+000010DE  6600 FF5E                122              bne     wPswd
+000010E2  5303                     123              subQ.b  #1,d3
+000010E4  66F6                     124              bne     lp2
+000010E6                           125  
+000010E6  3A3C 0007                126              move    #7,d5
+000010EA  4242                     127              clr     d2
+000010EC  6100 FF1E                128  lp3:        bsr     cntr
+000010F0  6100 FF0E                129              bsr     dly
+000010F4  5305                     130              subQ.b  #1,d5
+000010F6  66F4                     131              bne     lp3
+000010F8                           132  
+000010F8  4E72 0A8C                133              stop    #2700
+000010FC  FFFF FFFF                134              SIMHALT
+00001100                           135              
+00001100= 20 2E 2E 2E 20 00        136  dots        dc.b    ' ... ',0
+00001106= 0006                     137  dts         dc      dts-dots
+00001108                           138  
+00001108= 49 6E 76 61 6C 69 64     139  wName       dc.b    'Invalid username try again.',0
+          20 75 73 65 72 6E 61  
+          6D 65 20 74 72 79 20  
+          61 67 61 69 6E 2E 00  
+00001124= 001C                     143  wns         dc      wns-wName
+00001126                           144  
+00001126= 49 6E 76 61 6C 69 64     145  wPass       dc.b    'Invalid password try again.',0
+          20 70 61 73 73 77 6F  
+          72 64 20 74 72 79 20  
+          61 67 61 69 6E 2E 00  
+00001142= 001C                     149  wps         dc      wps-wPass
+00001144                           150  
+00001144= 45 6E 74 65 72 20 75     151  pr1         dc.b    'Enter username: ',0
+          73 65 72 6E 61 6D 65  
+          3A 20 00              
+00001156= 0012                     154  ps1         dc      ps1-pr1
+00001158                           155  
+00001158= 45 6E 74 65 72 20 70     156  pr2         dc.b    'Enter password: ',0
+          61 73 73 77 6F 72 64  
+          3A 20 00              
+0000116A= 0012                     159  ps2         dc      ps2-pr2
+0000116C                           160  
+0000116C= 61 64 6D 69 6E 00        161  user        dc.b    'admin',0
+00001172= 05                       162  uns         dc.b    5
+00001173                           163  
+00001173                           164  name        ds.b    100
+000011D8= 0065                     165  ns          dc      ns-name
+000011DA                           166  
+000011DA= 68 69 31 32 00           167  pass        dc.b    'hi12',0
+000011DF= 04                       168  ps          dc.b    4
+000011E0                           169  
+000011E0                           170  pswd        ds.b    100
+00001244= 0064                     171  pws         dc      pws-pswd
+00001246                           172  
+00001246= 0D 0A 00                 173  crlf        dc.b    CR,LF,0
+00001249= 03                       174  nl          dc.b    nl-crlf
+0000124A  =0000000D                175  CR          equ     $0D
+0000124A  =0000000A                176  LF          equ     $0A
+0000124A                           177  
+0000124A                           178              END     main
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CNTR                100C
+CR                  D
+CRLF                1246
+DLY                 1000
+DOTS                1100
+DTS                 1106
+LF                  A
+LP                  1006
+LP1                 10BC
+LP2                 10DC
+LP3                 10EC
+MAIN                1058
+NAME                1173
+NL                  1249
+NS                  11D8
+PASS                11DA
+PR1                 1144
+PR2                 1158
+PS                  11DF
+PS1                 1156
+PS2                 116A
+PSWD                11E0
+PWS                 1244
+UNS                 1172
+USER                116C
+WNAME               1108
+WNS                 1124
+WPASS               1126
+WPS                 1142
+WPSWD               103E
+WUSR                1024
